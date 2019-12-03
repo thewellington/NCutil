@@ -173,9 +173,9 @@ def set_flags(flags, bundle_id):
 
 def bundleid_exists(bundle_id):
     '''Returns a boolean telling us if the bundle_id is in the database.'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
-    curs.execute("SELECT bundleid from app_info WHERE bundleid IS '%s'"
-                 % bundle_id)
+    curs.execute("SELECT {0} from {1} WHERE {0} IS '{2}'".format(app_name, table_name, bundle_id))
     matching_ids = [row[0] for row in curs.fetchall()]
     conn.close()
     return len(matching_ids) > 0
@@ -183,9 +183,9 @@ def bundleid_exists(bundle_id):
 
 def get_matching_ids(match_string):
     '''Returns any bundle_ids matching the match_string'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
-    curs.execute("SELECT bundleid from app_info WHERE bundleid LIKE '%s'"
-                 % match_string)
+    curs.execute("SELECT {0} from {1} WHERE {0} LIKE '{2}'".format(app_name, app_info, match_string))
     matching_ids = [row[0] for row in curs.fetchall()]
     conn.close()
     return matching_ids
