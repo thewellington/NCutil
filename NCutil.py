@@ -78,7 +78,18 @@ def connect_to_db():
         curs = conn.cursor()
     return conn, curs
 
-
+def db_schema():
+    osx_major = get_osx_major()
+    if osx_major in ['10.8', '10.9', '10.10', '10.11', '10.12', '10.13']:
+        table_name = "app_info"
+        app_name = "bundleid"
+    elif osx_major in ['10.14']:
+        table_name = "app"
+        app_name = "identifier"
+    else:
+        raise Exception('Unsupported macOS version; unable to locate correct table')
+    return table_name, app_name
+    
 def kill_notification_center():
     '''Send a kill signal to NotificationCenter and usernoted; they will
     relaunch'''
