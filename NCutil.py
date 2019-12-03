@@ -55,6 +55,11 @@ def get_nc_db():
             ['/usr/bin/getconf', 'DARWIN_USER_DIR']).rstrip()
         nc_db = os.path.join(
             darwin_user_dir, 'com.apple.notificationcenter/db/db')
+    elif osx_major in ['10.14']:
+        darwin_user_dir = subprocess.check_output(
+            ['/usr/bin/getconf', 'DARWIN_USER_DIR']).rstrip()
+        nc_db = os.path.join(
+            darwin_user_dir, 'com.apple.notificationcenter/db2/db')
     else:
         raise Exception('Unsupported macOS version; unable to locate Notification Center database')
     return nc_db
