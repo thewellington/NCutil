@@ -114,8 +114,9 @@ def verboseOutput(*args):
 
 def list_clients():
     '''List all bundleids in database'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
-    curs.execute("select bundleid from app_info")
+    curs.execute("select %s from %s" %(app_name, table_name))
     for row in curs.fetchall():
         print row[0]
     conn.close()
@@ -123,7 +124,8 @@ def list_clients():
 
 def get_available_id(curs):
     '''Get the highest app_id, then increment'''
-    curs.execute("select app_id from app_info")
+    table_name, app_name = db_schema()
+    curs.execute("select %s from %s" %(app_name, table_name))
     # return first field of last row
     last_id = curs.fetchall()[-1][0]
     return last_id + 1
@@ -131,12 +133,13 @@ def get_available_id(curs):
 
 def insert_app(bundle_ids):
     '''Adds bundle_ids to Notification Center database'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
     for bundle_id in bundle_ids:
         if not bundleid_exists(bundle_id):
             next_id = get_available_id(curs)
-            curs.execute("INSERT INTO app_info VALUES('%s', '%s', '14', '5', '%s')"
-                         % (next_id, bundle_id, next_id))
+            curs.execute("INSERT INTO %s VALUES('%s', '%s', '14', '5', '%s')"
+                         % (table_name, next_id, bundle_id, next_id))
         else:
             print >> sys.stderr, "%s is already in Notification Center" % bundle_id
 
@@ -146,13 +149,14 @@ def insert_app(bundle_ids):
 
 def remove_app(bundle_ids):
     '''Removes bundle_ids from Notification Center database'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
     for bundle_id in bundle_ids:
         if not bundleid_exists(bundle_id):
             print >> sys.stderr, (
                 "WARNING: %s not in Notification Center" % bundle_id)
         else:
-            curs.execute("DELETE from app_info where bundleid IS '%s'" % (bundle_id))
+            curs.execute("DELETE from %s where %s IS '%s'" % (table_name, app_name, bundle_id))
 
     commit_changes(conn)
     kill_notification_center()
@@ -160,9 +164,10 @@ def remove_app(bundle_ids):
 
 def set_flags(flags, bundle_id):
     '''Sets Notification Center flags for bundle_id'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
-    curs.execute("UPDATE app_info SET flags='%s' where bundleid='%s'"
-                  % (flags, bundle_id))
+    curs.execute("UPDATE %s SET flags='%s' where %s='%s'"
+                  % (table_name, flags, app_name, bundle_id))
     commit_changes(conn)
 
 
@@ -188,8 +193,10 @@ def get_matching_ids(match_string):
 
 def get_flags(bundle_id):
     '''Returns flags for bundle_id'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
-    curs.execute("SELECT flags from app_info where bundleid='%s'" % (bundle_id))
+    curs.execute("SELECT flags from %s where %s='%s'"
+                  % (table_name, app_name, bundle_id))
     try:
         flags = curs.fetchall()[0][0]
     except IndexError:
@@ -200,8 +207,10 @@ def get_flags(bundle_id):
 
 def get_show_count(bundle_id):
     '''Returns number of items to show in Notification Center for bundle_id'''
+    table_name, app_name = db_schema()
     conn, curs = connect_to_db()
-    curs.execute("SELECT show_count from app_info where bundleid='%s'" % (bundle_id))
+    curs.execute("SELECT show_count from %s where %s='%s'"
+                 % (table_name, app_name, bundle_id))
     try:
         flags = curs.fetchall()[0][0]
     except IndexError:
